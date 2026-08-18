@@ -1,8 +1,7 @@
 [gd_scene format=3 uid="uid://ctr6elph4ldtf"]
 
-[ext_resource type="Script" uid="uid://co0r07rruj4md" path="res://connection_generator.gd" id="1_h2yge"]
+[ext_resource type="Script" uid="uid://co0r07rruj4md" path="res://flow_field.gd" id="1_h2yge"]
 [ext_resource type="PackedScene" uid="uid://ckgycujhcmkck" path="res://level.tscn" id="1_ig7tw"]
-[ext_resource type="PackedScene" uid="uid://bp6kwqyfgi462" path="res://grid.tscn" id="2_0xm2m"]
 
 [sub_resource type="ProceduralSkyMaterial" id="ProceduralSkyMaterial_0xm2m"]
 sky_horizon_color = Color(0.66224277, 0.6717428, 0.6867428, 1)
@@ -29,18 +28,16 @@ shadow_enabled = true
 [node name="WorldEnvironment" type="WorldEnvironment" parent="." unique_id=92576863]
 environment = SubResource("Environment_1bvp3")
 
-[node name="NavigationRegion3D" type="NavigationRegion3D" parent="." unique_id=1003268724 node_paths=PackedStringArray("debug_mesh")]
+[node name="NavigationRegion3D" type="NavigationRegion3D" parent="." unique_id=1003268724 node_paths=PackedStringArray("debug")]
 navigation_mesh = SubResource("NavigationMesh_3lrjh")
 script = ExtResource("1_h2yge")
 NAVIGATION_MESH = SubResource("NavigationMesh_3lrjh")
-debug_mesh = NodePath("../debugmesh")
+debug = NodePath("../debugmesh")
 
 [node name="level" parent="NavigationRegion3D" unique_id=498566957 instance=ExtResource("1_ig7tw")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.02091074, 0.005829811, -0.0014078617)
 
-[node name="Grid" parent="." unique_id=864450832 instance=ExtResource("2_0xm2m")]
-
 [node name="Camera3D" type="Camera3D" parent="." unique_id=443120283]
-transform = Transform3D(0.20676047, -0.49913156, 0.8414974, 0, 0.8600824, 0.5101552, -0.97839165, -0.10547992, 0.17783104, 15.932367, 14.70945, 1.2408533)
+transform = Transform3D(1, 0, 0, 0, -4.371139e-08, 1, 0, -1, -4.371139e-08, 0, 43.065002, 0)
 
 [node name="debugmesh" type="MeshInstance3D" parent="." unique_id=317828555]
