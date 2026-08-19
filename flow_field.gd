@@ -1,3 +1,4 @@
+class_name FlowField
 extends NavigationRegion3D
 
 #the given navigation mesh is only used as for mesh degeneration
@@ -16,30 +17,54 @@ class Portal:
 class NavigationNode:
 	var vertices: PackedInt32Array		#indices
 	var position: Vector3				#middle-point of the node
-	var g: float
+	var g: float = INF
 	var closed: bool = false
 	
 	var neighbour_ids: PackedInt32Array		#neighbour node indices
 	
+	var best_neighbour: NavigationNode #<- change this, waste of memory
 	var ideal_direction: Vector3 = Vector3.ZERO
 
 var NODE_LIST: Array[NavigationNode] = []
+var TARGET_NODE: NavigationNode = null
+var TARGET_POSITION: Vector3 = Vector3.ZERO
 
 func _ready() -> void:
 	_generate_nodes()
-	generate_flow_field(Vector3.ZERO)
-	pass
 
 func _process(delta: float) -> void:
 	_draw_flow_field()
 
 func generate_flow_field(_target: Vector3):
+	_reset_nodes()
+	TARGET_NODE = _get_closest_node(_target)
+	if (TARGET_NODE == null):
+		return
+	
+	var vs = NAVIGATION_MESH.get_vertices()
+	TARGET_POSITION = _project_point_tri(_target, vs[TARGET_NODE.vertices[0]], vs[TARGET_NODE.vertices[1]], vs[TARGET_NODE.vertices[2]])
+	
 	_generate_costs(_target)
-	_generate_directions()
+	_generate_directions(_target)
 
-func get_ideal_direction(_target: Vector3) -> Vector3:
-	return NODE_LIST[_get_closest_point(_target)].ideal_direction
+func query_ideal_direction(_position: Vector3) -> Vector3:
+	var closest_node: NavigationNode = _get_closest_node(_position)
+	if closest_node == TARGET_NODE :
+		return Vector3.ZERO
+	elif closest_node == null:
+		return Vector3.DOWN
+	
+	return closest_node.ideal_direction
 
+func _reset_nodes():
+	TARGET_NODE = null
+	TARGET_POSITION = Vector3.ZERO
+	
+	for node in NODE_LIST:
+		node.g = INF
+		node.closed = false
+		node.best_neighbour = null
+		node.ideal_direction = Vector3.ZERO
 
 func _generate_nodes():
 	var edge_map: Dictionary[Vector3, PackedInt32Array] = {}
@@ -72,47 +97,68 @@ func _generate_nodes():
 
 			node1.neighbour_ids.push_back(connected_pair[1])
 			node2.neighbour_ids.push_back(connected_pair[0])
-			
-		
 
-func _get_closest_point(_target: Vector3) -> int:
-	var closest_node_id: int = 0
-	var closest_dist: float = INF
-	
-	for id in NODE_LIST.size():
-		var curr_dist: float = NODE_LIST[id].position.distance_to(_target)
-		if curr_dist < closest_dist:
-			closest_dist = curr_dist
-			closest_node_id = id
-	
-	return closest_node_id
+
+func _get_closest_node(_target: Vector3) -> NavigationNode:
+	var vertices = NAVIGATION_MESH.get_vertices()
+	for node in NODE_LIST:
+		var a = vertices[node.vertices[0]]
+		var b = vertices[node.vertices[1]]
+		var c = vertices[node.vertices[2]]
+		
+		var ab = b - a
+		var ac = c - a
+		var bc = c - b
+		var ca = a - c
+		
+		var normal = ab.cross(ac).normalized()
+		var projected_target = _project_point_tri(_target, a, b, c) #better to calculate it manually instead here but whatever
+		
+		var proj_a = projected_target - a
+		var proj_b = projected_target - b
+		var proj_c = projected_target - c
+		
+		var inside_ab = ab.cross(proj_a).dot(normal) >= 0
+		var inside_bc = bc.cross(proj_b).dot(normal) >= 0
+		var inside_ca = ca.cross(proj_c).dot(normal) >= 0
+		
+		if inside_ab and inside_bc and inside_ca:
+			return node
+	return null
+
 
 func _generate_costs(_target: Vector3):
-	var target_node: NavigationNode = NODE_LIST[_get_closest_point(_target)]
+	var target_node: NavigationNode = _get_closest_node(_target)
 	debug_target = target_node
-	var open_nodes: Array[NavigationNode] = [target_node]
 	
-	var cost: float = 1.0
+	if target_node == null:
+		return
 	
-	while !open_nodes.is_empty():
-		cost += 1.0
-		var current_node = open_nodes[0]
-		open_nodes.erase(current_node)
+	target_node.g  = 0
+	var queue: Array[NavigationNode] = [target_node]
+	
+	while !queue.is_empty():
+		queue.sort_custom(func(_a,_b): return _a.g < _b.g)
+		var current_node = queue.pop_front()
 		
 		if current_node.closed:
 			continue
-		
 		current_node.closed = true
-		current_node.g = cost + current_node.position.distance_to(target_node.position)
 		
-		for curr_neighbour_id in current_node.neighbour_ids:
-			var current_neighbour = NODE_LIST[curr_neighbour_id]
-			if current_neighbour.closed:
+		for neighbour_id in current_node.neighbour_ids:
+			var neighbour = NODE_LIST[neighbour_id]
+			if neighbour.closed:
 				continue
-			open_nodes.push_back(current_neighbour)
+			
+			var cost = current_node.g + current_node.position.distance_to(neighbour.position)
+			if cost < neighbour.g:
+				neighbour.g = cost
+				queue.push_back(neighbour)
 		
 	
-func _generate_directions():
+func _generate_directions(_target: Vector3):
+	#	1st pass - find best neighbour
+	
 	for current_node in NODE_LIST:
 		var best_neighbour: NavigationNode
 		var lowest_cost: int = INT32_MAX
@@ -124,9 +170,69 @@ func _generate_directions():
 				best_neighbour = neighbour_node
 		
 		if best_neighbour != null:
+			current_node.best_neighbour = best_neighbour
+			#set initial direction now for safety
 			current_node.ideal_direction = current_node.position.direction_to(best_neighbour.position)
 		
+	#	2nd pass - limit angle from furthest vertex
+	
+	var vertices = NAVIGATION_MESH.get_vertices()
+	
+	for current_node in NODE_LIST:
+		var furthest_vertex: Vector3 = Vector3.ZERO
+		var other_verts: Array[Vector3] = []
+		
+		for index in current_node.vertices:
+			if current_node.best_neighbour == null:
+				continue
 			
+			if current_node.best_neighbour.vertices.has(index):
+				other_verts.push_back(vertices[index])
+			else:
+				furthest_vertex = vertices[index] #assuming triangles right now
+				
+		if furthest_vertex == Vector3.ZERO:
+			continue
+		
+		var ideal_direction: Vector3 = current_node.position.direction_to(_target)
+		
+		var v1_dir: Vector3 = furthest_vertex.direction_to(other_verts[0])
+		var v2_dir: Vector3 = furthest_vertex.direction_to(other_verts[1])
+		
+		var left_bound: Vector3
+		var right_bound: Vector3
+		
+		if v1_dir.cross(v2_dir).y > 0:
+			left_bound = v1_dir
+			right_bound = v2_dir
+		else:
+			left_bound = v2_dir
+			right_bound = v1_dir
+		
+		var oob_left = left_bound.cross(ideal_direction).y < 0
+		var oob_right = ideal_direction.cross(right_bound).y < 0
+		
+		if oob_left:
+			current_node.ideal_direction = left_bound
+		elif oob_right:
+			current_node.ideal_direction = right_bound
+		else:
+			current_node.ideal_direction = ideal_direction
+		
+	for node in NODE_LIST:
+		if node.ideal_direction == Vector3.ZERO:
+			continue
+		node.ideal_direction.y = 0
+		node.ideal_direction = node.ideal_direction.normalized()
+
+func _project_point_tri(_point: Vector3, _a: Vector3, _b: Vector3, _c: Vector3) -> Vector3:
+		var ab = _b - _a
+		var ac = _c - _a
+		var normal = ab.cross(ac).normalized()
+		
+		var s_dist = normal.dot(_point - _a)
+		return _point - (s_dist * normal)
+	
 		
 func _draw_costs():
 	var imm_mesh = ImmediateMesh.new()
