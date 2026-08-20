@@ -8,6 +8,8 @@
 #include "navigation/fieldwrapper.h"
 #include "navigation/navigationentity.h"
 
+#include "ecs/ecs_tester.h"
+
 using namespace godot;
 
 void initialize_gdextension_types(ModuleInitializationLevel p_level)
@@ -16,6 +18,7 @@ void initialize_gdextension_types(ModuleInitializationLevel p_level)
 		return;
 	}
 	GDREGISTER_CLASS(FieldWrapper);
+	GDREGISTER_CLASS(ECSTester);
 	GDREGISTER_CLASS(NavigationEntity);
 }
 
