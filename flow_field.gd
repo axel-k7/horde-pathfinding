@@ -21,8 +21,6 @@ class NavigationNode:
 	var closed: bool = false
 	
 	var neighbour_ids: PackedInt32Array		#neighbour node indices
-	
-	var best_neighbour: NavigationNode #<- change this, waste of memory
 	var ideal_direction: Vector3 = Vector3.ZERO
 
 var NODE_LIST: Array[NavigationNode] = []
@@ -37,24 +35,15 @@ func _process(delta: float) -> void:
 
 func generate_flow_field(_target: Vector3):
 	_reset_nodes()
-	TARGET_NODE = _get_closest_node(_target)
+	TARGET_NODE = NODE_LIST[_get_closest_node(_target)]
 	if (TARGET_NODE == null):
 		return
 	
 	var vs = NAVIGATION_MESH.get_vertices()
 	TARGET_POSITION = _project_point_tri(_target, vs[TARGET_NODE.vertices[0]], vs[TARGET_NODE.vertices[1]], vs[TARGET_NODE.vertices[2]])
 	
-	_generate_costs(_target)
-	_generate_directions(_target)
-
-func query_ideal_direction(_position: Vector3) -> Vector3:
-	var closest_node: NavigationNode = _get_closest_node(_position)
-	if closest_node == TARGET_NODE :
-		return Vector3.ZERO
-	elif closest_node == null:
-		return Vector3.DOWN
-	
-	return closest_node.ideal_direction
+	_generate_costs(TARGET_POSITION)
+	_generate_directions(TARGET_POSITION)
 
 func _reset_nodes():
 	TARGET_NODE = null
@@ -63,7 +52,6 @@ func _reset_nodes():
 	for node in NODE_LIST:
 		node.g = INF
 		node.closed = false
-		node.best_neighbour = null
 		node.ideal_direction = Vector3.ZERO
 
 func _generate_nodes():
@@ -99,9 +87,10 @@ func _generate_nodes():
 			node2.neighbour_ids.push_back(connected_pair[0])
 
 
-func _get_closest_node(_target: Vector3) -> NavigationNode:
+func _get_closest_node(_target: Vector3) -> int:
 	var vertices = NAVIGATION_MESH.get_vertices()
-	for node in NODE_LIST:
+	for node_id in NODE_LIST.size():
+		var node: NavigationNode = NODE_LIST[node_id]
 		var a = vertices[node.vertices[0]]
 		var b = vertices[node.vertices[1]]
 		var c = vertices[node.vertices[2]]
@@ -123,19 +112,16 @@ func _get_closest_node(_target: Vector3) -> NavigationNode:
 		var inside_ca = ca.cross(proj_c).dot(normal) >= 0
 		
 		if inside_ab and inside_bc and inside_ca:
-			return node
-	return null
+			return node_id
+	return -1
 
 
-func _generate_costs(_target: Vector3):
-	var target_node: NavigationNode = _get_closest_node(_target)
-	debug_target = target_node
-	
-	if target_node == null:
+func _generate_costs(_target: Vector3):	
+	if TARGET_NODE == null:
 		return
 	
-	target_node.g  = 0
-	var queue: Array[NavigationNode] = [target_node]
+	TARGET_NODE.g  = 0
+	var queue: Array[NavigationNode] = [TARGET_NODE]
 	
 	while !queue.is_empty():
 		queue.sort_custom(func(_a,_b): return _a.g < _b.g)
@@ -155,8 +141,6 @@ func _generate_costs(_target: Vector3):
 				neighbour.g = cost
 				queue.push_back(neighbour)
 			
-				
-		
 	
 func _generate_directions(_target: Vector3):
 	for node in NODE_LIST:
@@ -230,6 +214,7 @@ func _generate_directions(_target: Vector3):
 		node.ideal_direction.y = 0
 		node.ideal_direction = node.ideal_direction.normalized()
 
+
 func _project_point_tri(_point: Vector3, _a: Vector3, _b: Vector3, _c: Vector3) -> Vector3:
 		var ab = _b - _a
 		var ac = _c - _a
@@ -251,6 +236,7 @@ func _draw_costs():
 		
 	imm_mesh.surface_end()
 	
+
 func _draw_flow_field():
 	var imm_mesh = ImmediateMesh.new()
 	debug.mesh = imm_mesh
