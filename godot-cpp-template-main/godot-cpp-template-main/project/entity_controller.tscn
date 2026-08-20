@@ -1,0 +1,31 @@
+[gd_scene format=3 uid="uid://dra05tm2kaxn7"]
+
+[ext_resource type="Script" uid="uid://8ldvimrq0ftj" path="res://entity_controller.gd" id="1_sr5bh"]
+
+[node name="Control" type="Control" unique_id=545911185]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_sr5bh")
+
+[node name="VBoxContainer" type="VBoxContainer" parent="." unique_id=1052102258]
+layout_mode = 0
+offset_right = 40.0
+offset_bottom = 40.0
+
+[node name="remove100" type="Button" parent="VBoxContainer" unique_id=1382685593]
+layout_mode = 2
+text = "KILL 100 CHILDREN"
+
+[node name="spawn100" type="Button" parent="VBoxContainer" unique_id=251157255]
+layout_mode = 2
+text = "BIRTH 100 CHILDREN"
+
+[node name="entity_count" type="Label" parent="VBoxContainer" unique_id=11353368]
+layout_mode = 2
+
+[connection signal="pressed" from="VBoxContainer/remove100" to="." method="_on_remove_100_pressed"]
+[connection signal="pressed" from="VBoxContainer/spawn100" to="." method="_on_spawn_100_pressed"]
