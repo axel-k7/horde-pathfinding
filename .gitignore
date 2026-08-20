@@ -1,6 +1,5 @@
 # Godot 4+ specific ignores
 .godot/
-/godot-cpp-template-main/.*
-/godot-cpp-template-main/godot-cpp-template-main/.*
-/godot-cpp-template-main/godot-cpp-template-main/out
+/.*
+/out
 /android/

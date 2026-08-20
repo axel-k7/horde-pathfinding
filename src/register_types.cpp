@@ -5,8 +5,8 @@
 #include <godot_cpp/core/defs.hpp>
 #include <godot_cpp/godot.hpp>
 
-#include "fieldwrapper.h"
-#include "entity.h"
+#include "navigation/fieldwrapper.h"
+#include "navigation/navigationentity.h"
 
 using namespace godot;
 

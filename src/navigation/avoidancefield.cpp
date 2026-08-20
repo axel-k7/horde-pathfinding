@@ -1,6 +1,6 @@
 #include "avoidancefield.h"
 
-#include "entity.h"
+#include "navigationentity.h"
 
 auto AvoidanceField::RegisterEntity(NavigationEntity* _entity) -> int32_t {
 	int id = -1;
