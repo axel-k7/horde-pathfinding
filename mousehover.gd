@@ -13,7 +13,7 @@ func _input(event: InputEvent) -> void:
 			flowfield.generate_flow_field(
 				camera.project_ray_origin(mouse_pos) + 
 				camera.project_ray_normal(mouse_pos) *
-				50			
+				80			
 			)
 			
 			

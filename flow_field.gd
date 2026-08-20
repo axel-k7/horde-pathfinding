@@ -154,71 +154,76 @@ func _generate_costs(_target: Vector3):
 			if cost < neighbour.g:
 				neighbour.g = cost
 				queue.push_back(neighbour)
+			
+				
 		
 	
 func _generate_directions(_target: Vector3):
-	#	1st pass - find best neighbour
-	
-	for current_node in NODE_LIST:
-		var best_neighbour: NavigationNode
-		var lowest_cost: int = INT32_MAX
+	for node in NODE_LIST:
+		node.closed = false
 		
-		for neighbour_id in current_node.neighbour_ids:
-			var neighbour_node = NODE_LIST[neighbour_id]
-			if neighbour_node.g < lowest_cost:
-				lowest_cost = neighbour_node.g
-				best_neighbour = neighbour_node
-		
-		if best_neighbour != null:
-			current_node.best_neighbour = best_neighbour
-			#set initial direction now for safety
-			current_node.ideal_direction = current_node.position.direction_to(best_neighbour.position)
-		
-	#	2nd pass - limit angle from furthest vertex
-	
+	var queue: Array[NavigationNode] = [TARGET_NODE]
 	var vertices = NAVIGATION_MESH.get_vertices()
 	
-	for current_node in NODE_LIST:
-		var furthest_vertex: Vector3 = Vector3.ZERO
-		var other_verts: Array[Vector3] = []
+	while !queue.is_empty():
+		queue.sort_custom(func(_a,_b): return _a.g < _b.g)
+		var current_node: NavigationNode = queue.pop_front()
 		
-		for index in current_node.vertices:
-			if current_node.best_neighbour == null:
+		if current_node == TARGET_NODE:
+			current_node.closed = true
+			for neighbour_id in current_node.neighbour_ids:
+				var neighbour = NODE_LIST[neighbour_id]
+				neighbour.ideal_direction = neighbour.position.direction_to(_target)
+				queue.push_back(neighbour)
+		
+		if current_node.closed:
+			continue
+		current_node.closed = true
+		
+		for neighbour_id in current_node.neighbour_ids:
+			var neighbour: NavigationNode = NODE_LIST[neighbour_id]
+			if neighbour.closed:
 				continue
 			
-			if current_node.best_neighbour.vertices.has(index):
-				other_verts.push_back(vertices[index])
-			else:
-				furthest_vertex = vertices[index] #assuming triangles right now
+			var furthest_vertex: Vector3 = Vector3.ZERO
+			var other_verts: Array[Vector3] = []
+		
+			for index in neighbour.vertices:
+				if current_node.vertices.has(index):
+					other_verts.push_back(vertices[index])
+				else:
+					furthest_vertex = vertices[index] #assuming triangles right now
 				
-		if furthest_vertex == Vector3.ZERO:
-			continue
+			if furthest_vertex == Vector3.ZERO:
+				continue
+				
+			var ideal_direction: Vector3 = current_node.ideal_direction
 		
-		var ideal_direction: Vector3 = current_node.position.direction_to(_target)
-		
-		var v1_dir: Vector3 = furthest_vertex.direction_to(other_verts[0])
-		var v2_dir: Vector3 = furthest_vertex.direction_to(other_verts[1])
-		
-		var left_bound: Vector3
-		var right_bound: Vector3
-		
-		if v1_dir.cross(v2_dir).y > 0:
-			left_bound = v1_dir
-			right_bound = v2_dir
-		else:
-			left_bound = v2_dir
-			right_bound = v1_dir
-		
-		var oob_left = left_bound.cross(ideal_direction).y < 0
-		var oob_right = ideal_direction.cross(right_bound).y < 0
-		
-		if oob_left:
-			current_node.ideal_direction = left_bound
-		elif oob_right:
-			current_node.ideal_direction = right_bound
-		else:
-			current_node.ideal_direction = ideal_direction
-		
+			var v1_dir: Vector3 = furthest_vertex.direction_to(other_verts[0])
+			var v2_dir: Vector3 = furthest_vertex.direction_to(other_verts[1])
+			
+			var left_bound: Vector3
+			var right_bound: Vector3
+			
+			if v1_dir.cross(v2_dir).y > 0:
+				left_bound = v1_dir
+				right_bound = v2_dir
+			else:
+				left_bound = v2_dir
+				right_bound = v1_dir
+			
+			var oob_left = left_bound.cross(ideal_direction).y < 0
+			var oob_right = ideal_direction.cross(right_bound).y < 0
+			
+			if oob_left:
+				neighbour.ideal_direction = left_bound
+			elif oob_right:
+				neighbour.ideal_direction = right_bound
+			else:
+				neighbour.ideal_direction = ideal_direction
+				
+			queue.push_back(neighbour)
+	
 	for node in NODE_LIST:
 		if node.ideal_direction == Vector3.ZERO:
 			continue
