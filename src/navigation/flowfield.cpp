@@ -13,7 +13,8 @@ void FlowField::ResetNodes() {
 	}
 }
 
-void FlowField::GenerateNodes() {
+void FlowField::GenerateNodes(Ref<NavigationMesh> _nav_mesh) {
+	navmesh = _nav_mesh;
 	std::unordered_map<Vector3, std::pair<size_t, size_t>, VectorHash> edge_map = {};
 
 	const PackedVector3Array& vertices = navmesh->get_vertices();
@@ -50,8 +51,17 @@ auto FlowField::GetClosestNode(const Vector3& _target) -> int32_t {
 	const PackedVector3Array& vertices = navmesh->get_vertices();
 	const size_t node_count = node_list.size();
 
+	int32_t closest_id = -1;
+	float shortest_dist = FLT_MAX;
+
 	for (int i = 0; i < node_count; i++) {
-		const NavigationNode &node = node_list[i];
+		const NavigationNode& node = node_list[i];
+
+		float target_dist = _target.distance_squared_to(node.position);
+		if (target_dist < shortest_dist) {
+			shortest_dist = target_dist;
+			closest_id = i;
+		}
 
 		const Vector3& a = vertices[node.vertices[0]]; 
 		const Vector3& b = vertices[node.vertices[1]]; 
@@ -77,7 +87,7 @@ auto FlowField::GetClosestNode(const Vector3& _target) -> int32_t {
 			return i;
 	}
 
-	return -1;
+	return closest_id;
 }
 
 auto FlowField::ProjectPointTri(const Vector3& _point, const Vector3& _a, const Vector3& _b, const Vector3& _c) -> Vector3 {

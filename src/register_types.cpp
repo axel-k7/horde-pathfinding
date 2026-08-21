@@ -5,7 +5,6 @@
 #include <godot_cpp/core/defs.hpp>
 #include <godot_cpp/godot.hpp>
 
-#include "navigation/fieldwrapper.h"
 #include "navigation/navigationentity.h"
 
 #include "ecs/ecs_tester.h"
@@ -17,7 +16,6 @@ void initialize_gdextension_types(ModuleInitializationLevel p_level)
 	if (p_level != MODULE_INITIALIZATION_LEVEL_SCENE) {
 		return;
 	}
-	GDREGISTER_CLASS(FieldWrapper);
 	GDREGISTER_CLASS(ECSTester);
 	GDREGISTER_CLASS(NavigationEntity);
 }

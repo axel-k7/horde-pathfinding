@@ -36,7 +36,7 @@ public:
 	//void DrawFlowField();
 
 	void ResetNodes();
-	void GenerateNodes();
+	void GenerateNodes(Ref<NavigationMesh> _nav_mesh);
 	void GenerateCosts(const Vector3 &_target);
 	void GenerateDirections(const Vector3& _target);
 
@@ -49,5 +49,5 @@ public:
 	Vector3 target_position;
 
 
-	NavigationMesh* navmesh;
+	Ref<NavigationMesh> navmesh;
 };

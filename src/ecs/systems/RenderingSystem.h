@@ -37,6 +37,7 @@ public:
                 
                 mesh_data.bucket_index = addInstance(bucket, entity);
                 mesh_data.multimesh_rid = bucket.multimesh_rid;
+
             }
 
             renderer->multimesh_instance_set_transform(mesh_data.multimesh_rid, mesh_data.bucket_index, transform_data.transform);
@@ -121,7 +122,7 @@ private:
 
         bucket.multimesh_rid = renderer->multimesh_create();
         renderer->multimesh_set_mesh(bucket.multimesh_rid, _key.mesh);
-        renderer->multimesh_allocate_data(bucket.multimesh_rid, 100, RenderingServer::MULTIMESH_TRANSFORM_3D); //currently setting capacity to 100, need to change this later
+        renderer->multimesh_allocate_data(bucket.multimesh_rid, 5000, RenderingServer::MULTIMESH_TRANSFORM_3D); //currently setting capacity to 100, need to change this later
 
         bucket.instance_rid = renderer->instance_create();
         renderer->instance_set_base(bucket.instance_rid, bucket.multimesh_rid);

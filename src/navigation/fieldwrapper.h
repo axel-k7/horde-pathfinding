@@ -29,9 +29,8 @@ public:
 	FieldWrapper() = default;
 	~FieldWrapper() override = default;
 
-	void generate_nodes(NavigationMesh* _mesh) {
-		AVOIDANCE_FIELD.navmesh = _mesh;
-		AVOIDANCE_FIELD.GenerateNodes();
+	void generate_nodes(Ref<NavigationMesh> _mesh) {
+		AVOIDANCE_FIELD.GenerateNodes(_mesh);
 	}
 
 	void generate_field(const Vector3& _target) {

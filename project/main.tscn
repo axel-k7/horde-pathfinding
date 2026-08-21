@@ -1,10 +1,7 @@
 [gd_scene format=3 uid="uid://ctr6elph4ldtf"]
 
-[ext_resource type="Script" uid="uid://bx4ixyy361krr" path="res://wrapper_bridge.gd" id="1_1bvp3"]
+[ext_resource type="Script" uid="uid://dn40wcwekfa6d" path="res://mousehover.gd" id="1_0xm2m"]
 [ext_resource type="PackedScene" uid="uid://ckgycujhcmkck" path="res://level.tscn" id="1_ig7tw"]
-[ext_resource type="Script" uid="uid://dn40wcwekfa6d" path="res://mousehover.gd" id="3_h2yge"]
-[ext_resource type="Script" uid="uid://cn01myynnn0kw" path="res://entity_spawner.gd" id="4_lquwl"]
-[ext_resource type="PackedScene" uid="uid://dra05tm2kaxn7" path="res://entity_controller.tscn" id="5_lquwl"]
 
 [sub_resource type="ProceduralSkyMaterial" id="ProceduralSkyMaterial_0xm2m"]
 sky_horizon_color = Color(0.66224277, 0.6717428, 0.6867428, 1)
@@ -22,7 +19,14 @@ glow_enabled = true
 vertices = PackedVector3Array(-49.520912, 0.5058298, -30.751408, -34.770912, 0.5058298, -30.751408, -34.520912, 0.5058298, -32.001408, -32.520912, 0.5058298, -49.501408, -49.520912, 0.5058298, -49.501408, -32.520912, 0.5058298, -32.001408, 4.979088, 0.5058298, -41.001408, 6.229088, 0.5058298, -41.251408, 6.229088, 0.5058298, -49.501408, 4.979088, 0.5058298, -32.001408, 7.229088, 0.5058298, -41.001408, 25.479088, 0.5058298, -12.001408, 25.729088, 0.5058298, -11.001408, 49.479088, 0.5058298, -11.001408, 7.229088, 0.5058298, -12.001408, 49.479088, 0.5058298, -49.501408, -14.270912, 5.50583, -30.751408, -14.020912, 5.50583, -11.251408, -13.520912, 5.50583, -30.751408, -4.520912, 5.50583, -10.751408, 24.729088, 5.50583, -10.751408, 6.229088, 5.50583, -11.251408, 5.979088, 5.50583, -11.251408, 14.979088, 5.50583, -1.5014076, 14.979088, 5.50583, -2.0014076, -4.520912, 5.50583, -2.0014076, -5.020912, 5.50583, -1.7514076, 5.729088, 5.50583, -31.001408, -33.770912, 5.50583, -31.001408, -5.020912, 5.50583, -11.251408, 5.979088, 5.50583, -30.501408, 6.229088, 5.50583, -40.251408, -6.020912, 0.5058298, -11.001408, -12.770912, 0.5058298, -11.251408, -13.020912, 0.5058298, -10.251408, -6.020912, 0.5058298, -1.2514076, -15.020912, 0.5058298, -10.501408, -15.020912, 0.5058298, -29.751408, -34.520912, 0.5058298, -29.751408, -24.270912, 0.5058298, 9.998592, -6.020912, 0.5058298, 9.998592, -49.520912, 0.5058298, 12.248592, -24.520912, 0.5058298, 12.248592, -5.770912, 0.5058298, -12.251408, -12.770912, 0.5058298, -29.751408, 4.979088, 0.5058298, -12.001408, 4.979088, 0.5058298, -29.751408, 14.479088, 0.5058298, -9.751408, 14.229088, 0.5058298, -3.0014076, 15.729088, 0.5058298, -3.0014076, 16.229088, 0.5058298, -2.0014076, 25.479088, 0.5058298, -9.751408, 16.229088, 0.5058298, 7.2485924, 49.479088, 0.5058298, 7.4985924, -3.7709122, 0.5058298, -9.751408, -3.7709122, 0.5058298, -3.0014076, 3.2290878, 0.5058298, 5.2485924, 4.229088, 0.5058298, 5.2485924, 4.229088, 0.5058298, -0.7514076, -3.2709122, 0.5058298, 10.248592, 3.2290878, 0.5058298, 8.248592, 2.4790878, 0.5058298, 7.4985924, 2.4790878, 0.5058298, 6.2485924, -5.520912, 0.5058298, -0.7514076, 5.229088, 0.5058298, 5.2485924, 5.729088, 0.5058298, 6.7485924, 13.979088, 0.5058298, 6.7485924, 13.979088, 0.5058298, -0.7514076, 3.7290878, 1.5058298, 6.2485924, 3.4790878, 1.5058298, 6.7485924, 3.9790878, 1.5058298, 7.4985924, 4.729088, 1.5058298, 7.2485924, 4.729088, 1.5058298, 6.2485924, -3.2709122, 0.7558298, 10.998592, 5.729088, 0.5058298, 7.7485924, 14.229088, 0.5058298, 8.998592, 4.979088, 0.5058298, 8.498592, -3.2709122, 0.7558298, 23.248592, -3.2709122, 0.5058298, 24.248592, 15.979088, 0.5058298, 8.998592, -4.520912, 0.5058298, 49.498592, 49.479088, 0.5058298, 49.498592, -5.020912, 1.5058298, 10.998592, -5.020912, 1.5058298, 23.248592, -4.770912, 0.5058298, 24.248592, -23.520912, 7.25583, 10.998592, -23.520912, 7.25583, 23.248592, -49.520912, 0.5058298, 21.998592, -24.520912, 0.5058298, 21.998592, -24.520912, 0.5058298, 23.998592, -23.020912, 0.5058298, 49.498592, -22.770912, 0.5058298, 24.248592, -49.520912, 0.5058298, 49.498592)
 polygons = [PackedInt32Array(1, 0, 2), PackedInt32Array(2, 0, 4), PackedInt32Array(2, 4, 3), PackedInt32Array(3, 5, 2), PackedInt32Array(7, 6, 8), PackedInt32Array(8, 6, 3), PackedInt32Array(9, 5, 6), PackedInt32Array(6, 5, 3), PackedInt32Array(10, 7, 8), PackedInt32Array(13, 12, 11), PackedInt32Array(11, 14, 10), PackedInt32Array(10, 8, 11), PackedInt32Array(11, 8, 13), PackedInt32Array(13, 8, 15), PackedInt32Array(18, 17, 16), PackedInt32Array(22, 21, 19), PackedInt32Array(19, 21, 20), PackedInt32Array(24, 23, 25), PackedInt32Array(25, 23, 26), PackedInt32Array(18, 16, 27), PackedInt32Array(27, 16, 28), PackedInt32Array(25, 26, 19), PackedInt32Array(19, 26, 29), PackedInt32Array(27, 30, 18), PackedInt32Array(19, 29, 22), PackedInt32Array(27, 31, 30), PackedInt32Array(22, 30, 21), PackedInt32Array(21, 30, 31), PackedInt32Array(33, 32, 34), PackedInt32Array(34, 32, 35), PackedInt32Array(38, 37, 36), PackedInt32Array(35, 36, 34), PackedInt32Array(1, 38, 0), PackedInt32Array(35, 40, 39), PackedInt32Array(35, 39, 36), PackedInt32Array(36, 39, 41), PackedInt32Array(36, 41, 38), PackedInt32Array(38, 41, 0), PackedInt32Array(39, 42, 41), PackedInt32Array(32, 33, 43), PackedInt32Array(43, 33, 44), PackedInt32Array(45, 43, 46), PackedInt32Array(46, 43, 44), PackedInt32Array(49, 48, 47), PackedInt32Array(49, 47, 50), PackedInt32Array(50, 47, 51), PackedInt32Array(51, 12, 13), PackedInt32Array(50, 51, 52), PackedInt32Array(52, 51, 13), PackedInt32Array(52, 13, 53), PackedInt32Array(55, 54, 48), PackedInt32Array(48, 54, 47), PackedInt32Array(58, 57, 56), PackedInt32Array(61, 60, 59), PackedInt32Array(59, 62, 61), PackedInt32Array(56, 62, 58), PackedInt32Array(58, 62, 59), PackedInt32Array(58, 59, 40), PackedInt32Array(58, 40, 63), PackedInt32Array(35, 63, 40), PackedInt32Array(64, 57, 58), PackedInt32Array(64, 58, 65), PackedInt32Array(65, 58, 66), PackedInt32Array(66, 58, 67), PackedInt32Array(69, 68, 70), PackedInt32Array(70, 68, 71), PackedInt32Array(71, 68, 72), PackedInt32Array(73, 59, 60), PackedInt32Array(74, 65, 66), PackedInt32Array(74, 66, 76), PackedInt32Array(76, 66, 75), PackedInt32Array(76, 75, 77), PackedInt32Array(77, 75, 78), PackedInt32Array(60, 76, 73), PackedInt32Array(73, 76, 77), PackedInt32Array(78, 79, 80), PackedInt32Array(80, 79, 53), PackedInt32Array(80, 53, 81), PackedInt32Array(77, 83, 73), PackedInt32Array(73, 83, 82), PackedInt32Array(79, 52, 53), PackedInt32Array(78, 75, 79), PackedInt32Array(80, 84, 78), PackedInt32Array(86, 85, 83), PackedInt32Array(83, 85, 82), PackedInt32Array(41, 42, 87), PackedInt32Array(87, 42, 88), PackedInt32Array(87, 88, 89), PackedInt32Array(91, 90, 89), PackedInt32Array(89, 90, 92), PackedInt32Array(89, 92, 87), PackedInt32Array(91, 84, 90), PackedInt32Array(90, 84, 80)]
 
-[node name="main" type="Node3D" unique_id=50181213]
+[sub_resource type="CapsuleMesh" id="CapsuleMesh_1bvp3"]
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_lquwl"]
+
+[node name="main" type="Node3D" unique_id=50181213 node_paths=PackedStringArray("camera", "ecs_test")]
+script = ExtResource("1_0xm2m")
+camera = NodePath("Camera3D")
+ecs_test = NodePath("ECSTester")
 
 [node name="DirectionalLight3D" type="DirectionalLight3D" parent="." unique_id=677710535]
 transform = Transform3D(-0.8660254, -0.43301278, 0.25, 0, 0.49999997, 0.86602545, -0.50000006, 0.75, -0.43301266, 0, 0, 0)
@@ -34,26 +38,15 @@ environment = SubResource("Environment_1bvp3")
 [node name="Camera3D" type="Camera3D" parent="." unique_id=443120283]
 transform = Transform3D(1, 0, 0, 0, -4.371139e-08, 1, 0, -1, -4.371139e-08, 0, 70.053, 0)
 
-[node name="NavigationRegion3D" type="NavigationRegion3D" parent="." unique_id=1861023387 node_paths=PackedStringArray("fieldwrapper", "debug_mesh")]
+[node name="NavigationRegion3D" type="NavigationRegion3D" parent="." unique_id=1861023387]
 navigation_mesh = SubResource("NavigationMesh_l3mth")
-script = ExtResource("1_1bvp3")
-fieldwrapper = NodePath("../FieldWrapper")
-debug_mesh = NodePath("../debugmesh")
 
 [node name="level" parent="NavigationRegion3D" unique_id=498566957 instance=ExtResource("1_ig7tw")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.02091074, 0.005829811, -0.0014078617)
 
-[node name="FieldWrapper" type="FieldWrapper" parent="." unique_id=446108730 groups=["field"]]
-
 [node name="debugmesh" type="MeshInstance3D" parent="." unique_id=317828555]
 
-[node name="mousehover" type="Node3D" parent="." unique_id=523152255 node_paths=PackedStringArray("camera", "fieldwrapper")]
-script = ExtResource("3_h2yge")
-camera = NodePath("../Camera3D")
-fieldwrapper = NodePath("../FieldWrapper")
-
-[node name="entity_spawner" type="Node3D" parent="." unique_id=1414618922]
-script = ExtResource("4_lquwl")
-
-[node name="Control" parent="." unique_id=545911185 node_paths=PackedStringArray("spawner") instance=ExtResource("5_lquwl")]
-spawner = NodePath("../entity_spawner")
+[node name="ECSTester" type="ECSTester" parent="." unique_id=2100874480]
+nav_mesh = SubResource("NavigationMesh_l3mth")
+test_mesh = SubResource("CapsuleMesh_1bvp3")
+test_material = SubResource("StandardMaterial3D_lquwl")
