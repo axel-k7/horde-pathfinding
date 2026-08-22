@@ -47,6 +47,7 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.02091074, 0.005829811, -0.
 [node name="debugmesh" type="MeshInstance3D" parent="." unique_id=317828555]
 
 [node name="ECSTester" type="ECSTester" parent="." unique_id=2100874480]
+entity_count = 1000
 nav_mesh = SubResource("NavigationMesh_l3mth")
 test_mesh = SubResource("CapsuleMesh_1bvp3")
 test_material = SubResource("StandardMaterial3D_lquwl")

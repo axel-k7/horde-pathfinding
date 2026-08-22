@@ -47,6 +47,32 @@ void FlowField::GenerateNodes(Ref<NavigationMesh> _nav_mesh) {
 	}
 }
 
+auto FlowField::WithinNodeBounds(const Vector3& _target, int32_t _node_id, const PackedVector3Array& _vertices) -> bool {
+	const NavigationNode& node = node_list[_node_id];
+
+	const Vector3& a = _vertices[node.vertices[0]]; 		
+	const Vector3& b = _vertices[node.vertices[1]]; 
+	const Vector3& c = _vertices[node.vertices[2]];
+
+	const Vector3 ab = b - a;
+	const Vector3 ac = c - a;
+	const Vector3 bc = c - b;
+	const Vector3 ca = a - c;
+	
+	const Vector3 normal = ab.cross(ac).normalized();
+	const Vector3 projected_target = ProjectPointTri(_target, a, b, c);
+
+	const Vector3 proj_a = projected_target - a;
+	const Vector3 proj_b = projected_target - b;
+	const Vector3 proj_c = projected_target - c;
+
+	const bool inside_ab = ab.cross(proj_a).dot(normal) >= 0;
+	const bool inside_bc = bc.cross(proj_b).dot(normal) >= 0;
+	const bool inside_ca = ca.cross(proj_c).dot(normal) >= 0;
+
+	return inside_ab && inside_bc && inside_ca;
+}
+
 auto FlowField::GetClosestNode(const Vector3& _target) -> int32_t {
 	const PackedVector3Array& vertices = navmesh->get_vertices();
 	const size_t node_count = node_list.size();
@@ -55,35 +81,13 @@ auto FlowField::GetClosestNode(const Vector3& _target) -> int32_t {
 	float shortest_dist = FLT_MAX;
 
 	for (int i = 0; i < node_count; i++) {
-		const NavigationNode& node = node_list[i];
-
-		float target_dist = _target.distance_squared_to(node.position);
+		float target_dist = _target.distance_squared_to(node_list[i].position);
 		if (target_dist < shortest_dist) {
 			shortest_dist = target_dist;
 			closest_id = i;
 		}
 
-		const Vector3& a = vertices[node.vertices[0]]; 
-		const Vector3& b = vertices[node.vertices[1]]; 
-		const Vector3& c = vertices[node.vertices[2]];
-
-		const Vector3 ab = b - a;
-		const Vector3 ac = c - a;
-		const Vector3 bc = c - b;
-		const Vector3 ca = a - c;
-
-		const Vector3 normal = ab.cross(ac).normalized();
-		const Vector3 projected_target = ProjectPointTri(_target, a, b, c);
-
-		const Vector3 proj_a = projected_target - a;
-		const Vector3 proj_b = projected_target - b;
-		const Vector3 proj_c = projected_target - c;
-
-		const bool inside_ab = ab.cross(proj_a).dot(normal) >= 0;
-		const bool inside_bc = bc.cross(proj_b).dot(normal) >= 0;
-		const bool inside_ca = ca.cross(proj_c).dot(normal) >= 0;
-
-		if (inside_ab && inside_bc && inside_ca)
+		if (WithinNodeBounds(_target, i, vertices))
 			return i;
 	}
 
@@ -98,6 +102,21 @@ auto FlowField::ProjectPointTri(const Vector3& _point, const Vector3& _a, const 
 	const auto s_dist = normal.dot(_point - _a);
 
 	return _point - (s_dist * normal);
+}
+
+auto FlowField::CheckNodeChanged(const Vector3& _target, int32_t _node_id) -> int32_t {
+	if (_node_id != -1) {
+		const PackedVector3Array& vertices = navmesh->get_vertices();
+		
+		if (WithinNodeBounds(_target, _node_id, vertices))
+			return _node_id;
+		
+		for (int32_t n_id : node_list[_node_id].neighbour_ids)
+			if (WithinNodeBounds(_target, n_id, vertices))
+				return n_id;
+	}
+
+	return GetClosestNode(_target);
 }
 
 

@@ -40,6 +40,8 @@ public:
 	void GenerateCosts(const Vector3 &_target);
 	void GenerateDirections(const Vector3& _target);
 
+	auto CheckNodeChanged(const Vector3& _target, int32_t _node_id) -> int32_t;
+	auto WithinNodeBounds(const Vector3& _target, int32_t _node_id, const PackedVector3Array& _vertices) -> bool;
 	auto GetClosestNode(const Vector3& _target) -> int32_t;
 	auto ProjectPointTri(const Vector3& _point, const Vector3& _a, const Vector3& _b, const Vector3& _c) -> Vector3;
 

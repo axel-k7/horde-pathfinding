@@ -216,16 +216,17 @@ Registry::Archetype::Archetype(const Signature& _signature, const Registry* _reg
 }
 
 
-auto Registry::Archetype::ensureChunk() -> Chunk& {
+auto Registry::Archetype::ensureChunk() -> size_t {
     //find first non-filled chunk
-    for (auto& chunk : chunks) {
-        if (chunk.count < chunk.capacity)
-            return chunk;
+    for (size_t i = 0; i < chunks.size(); ++i) {
+        if (chunks[i].count < chunks[i].capacity)
+            return i;
     }
 
     //or create a new one
     //creating it directly inside of the chunk list through emplace
-    return chunks.emplace_back(active_components, CHUNK_CAPACITY);
+    chunks.emplace_back(active_components, CHUNK_CAPACITY);
+    return chunks.size()-1;
 }
 
 
@@ -275,12 +276,14 @@ void Registry::moveEntity(Entity _entity, const Signature& _target_signature) {
 
     Archetype* target_archetype = ensureArchetype(_target_signature);
 
-    Chunk& target_chunk = target_archetype->ensureChunk();
+    size_t target_chunk_index = target_archetype->ensureChunk();
+    Chunk& target_chunk = target_archetype->chunks[target_chunk_index];
     size_t target_index = target_chunk.count;
 
     //if entity already had components, move them into the new chunk
     //loop over previous active components -> move
     if (record.archetype) {
+        Chunk& source_chunk = record.archetype->chunks[record.chunk_index];
         for (const ComponentInfo* info : record.archetype->active_components) {
             if (!_target_signature.test(info->id))
                 continue;
@@ -288,7 +291,7 @@ void Registry::moveEntity(Entity _entity, const Signature& _target_signature) {
             target_chunk.moveComponent(
                 target_index, 
                 target_archetype->getLocalIndex(info->id),
-                record.chunk, 
+                &source_chunk, 
                 record.index, 
                 record.archetype->getLocalIndex(info->id),
                 info
@@ -298,10 +301,10 @@ void Registry::moveEntity(Entity _entity, const Signature& _target_signature) {
 
     target_chunk.pushEntity(_entity);
 
-    if (record.chunk)
-        eraseChunkEntry(record.chunk, record.index);
+    if (record.archetype)
+        eraseChunkEntry(&record.archetype->chunks[record.chunk_index], record.index);
 
-    updateEntityRecord(_entity, target_archetype, &target_chunk, target_index);
+    updateEntityRecord(_entity, target_archetype, target_chunk_index, target_index);
 }
 
 auto Registry::ensureArchetype(const Signature _signature) -> Archetype* {
@@ -346,7 +349,7 @@ void Registry::destroyEntity(Entity _entity) {
 
     EntityRecord& record = records[_entity.id];
 
-    Entity moved_entity = record.chunk->swapPop(record.index);
+    Entity moved_entity = record.archetype->chunks[record.chunk_index].swapPop(record.index);
 
     if (moved_entity != Entity::Null())
         records[moved_entity.id].index = record.index;
@@ -360,19 +363,19 @@ auto Registry::entityExists(const Entity& _entity) -> const bool {
     return _entity.id < versions.size() && versions[_entity.id] == _entity.version;
 }
 
-void Registry::updateEntityRecord(Entity _entity, Archetype* _archetype, Chunk* _chunk, size_t _chunk_index) {
+void Registry::updateEntityRecord(Entity _entity, Archetype* _archetype, size_t _chunk_index, size_t _index) {
     EntityRecord& record = records[_entity.id];
 
     record.archetype = _archetype;
-    record.chunk = _chunk;
-    record.index = _chunk_index;
+    record.chunk_index = _chunk_index;
+    record.index = _index;
 }
 
 void Registry::invalidateEntity(const Entity& _entity) {
     EntityRecord& record = records[_entity.id];
 
     record.archetype = nullptr;
-    record.chunk = nullptr;
+    record.chunk_index = SIZE_MAX;
     record.index = SIZE_MAX;
 }
 

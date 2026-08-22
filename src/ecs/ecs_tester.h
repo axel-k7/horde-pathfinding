@@ -6,9 +6,10 @@
 #include "godot_cpp/classes/material.hpp"
 #include "godot_cpp/classes/navigation_mesh.hpp"
 #include "godot_cpp/classes/concave_polygon_shape3d.hpp"
+#include "godot_cpp/classes/time.hpp"
 
 #include "systems/RenderingSystem.h"
-#include "systems/VelocitySystem.h"
+#include "systems/PhysicsSystem.h"
 #include "systems/NavigationSystem.h"
 #include "systems/CollisionSystem.h"
 
@@ -24,7 +25,7 @@ private:
     std::shared_ptr<EntityCommandBuffer> buffer;
 
     std::unique_ptr<RenderingSystem> render_sys;
-    std::unique_ptr<VelocitySystem> velocity_sys;
+    std::unique_ptr<PhysicsSystem> physics_sys;
     std::unique_ptr<CollisionSystem> collision_sys;
     std::unique_ptr<NavigationSystem> nav_sys;
 
@@ -34,6 +35,9 @@ private:
     Ref<Material> test_material;
     int entity_count = 100;
 
+    const uint32_t enviroment_layer = 1;
+    const uint32_t horde_layer = 2; //they shouldn't need collision checks with eachother if avoidance works properly
+
 public:
     void _ready() override { 
         if (Engine::get_singleton()->is_editor_hint()) 
@@ -42,7 +46,7 @@ public:
         registry = std::make_shared<Registry>();
         buffer = std::make_shared<EntityCommandBuffer>(registry);
 
-        velocity_sys = std::make_unique<VelocitySystem>(registry, buffer);
+        physics_sys = std::make_unique<PhysicsSystem>(registry, buffer);
 
         RID world_context = get_world_3d()->get_scenario();
         render_sys = std::make_unique<RenderingSystem>(
@@ -53,6 +57,8 @@ public:
 
         nav_sys = std::make_unique<NavigationSystem>(registry, buffer);
         nav_sys->GenerateNodes(nav_mesh);
+
+        collision_sys = std::make_unique<CollisionSystem>(registry, buffer, nav_sys.get());
 
         PhysicsServer3D* physics_server = PhysicsServer3D::get_singleton();
         auto space_rid = get_world_3d()->get_space();
@@ -86,8 +92,8 @@ public:
             physics_server->body_add_shape(body_rid, shape_rid, Transform3D());
             physics_server->body_set_mode(body_rid, PhysicsServer3D::BODY_MODE_KINEMATIC);
             physics_server->body_set_state(body_rid, PhysicsServer3D::BODY_STATE_TRANSFORM, transform->transform);
-            physics_server->body_set_collision_layer(body_rid, 1);
-            physics_server->body_set_collision_mask(body_rid, 1);
+            physics_server->body_set_collision_layer(body_rid, horde_layer);
+            physics_server->body_set_collision_mask(body_rid, enviroment_layer); //only collide with enviroment
             physics->body_rid = body_rid;
             physics->shape_rid = shape_rid;
             physics->collision_layer = 1;
@@ -99,10 +105,30 @@ public:
     }
 
     void _process(double delta) override {
-        if (render_sys && velocity_sys && nav_sys) { 
+        if (render_sys && nav_sys && collision_sys) { 
+            auto time = Time::get_singleton();
+            auto t0 = time->get_ticks_usec();
             render_sys->update(float(delta));
+            auto t1 = time->get_ticks_usec();
             nav_sys->update(float(delta));
-            velocity_sys->update(float(delta));
+            auto t2 = time->get_ticks_usec();
+            collision_sys->update(float(delta));
+            auto t3 = time->get_ticks_usec();
+
+            print_line("render sys: ", t1-t0);
+            print_line("nav sys: ", t2-t1);
+            print_line("nav-collision sys: ", t3-t2);
+        }
+    }
+    
+    void _physics_process(double delta) override {
+        if (physics_sys) {
+            auto time = Time::get_singleton();
+            auto t0 = time->get_ticks_usec();
+            physics_sys->update(float(delta));
+            auto t1 = time->get_ticks_usec();
+            
+            print_line("physics sys: ", t1-t0);
         }
     }
 

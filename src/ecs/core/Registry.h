@@ -85,6 +85,13 @@ struct SignatureHash {
     }
 };
 
+//lol idk if this actually works
+struct EntityHash {
+    size_t operator()(const Entity& _entity) const {
+        return std::hash<unsigned long long>{}(_entity.id);
+    }
+};
+
 class Registry {
 public:
     /////////////////////////////////////////////////////////////////////////
@@ -141,7 +148,7 @@ public:
 
         Archetype(const Signature& _signature, const Registry* _registry);
 
-        auto ensureChunk() -> Chunk&;
+        auto ensureChunk() -> size_t;
 
         template<typename T>
         auto getLocalIndex() const -> size_t;
@@ -334,7 +341,7 @@ public:
 
     struct EntityRecord {
         Archetype* archetype;
-        Chunk* chunk;
+        size_t chunk_index;
         size_t index;
     };
 
@@ -363,7 +370,7 @@ public:
     auto allocateEntity() -> Entity;
     void destroyEntity(Entity _entity);
 
-    void updateEntityRecord(Entity _entity, Archetype* _archetype, Chunk* _chunk, size_t _chunk_index);
+    void updateEntityRecord(Entity _entity, Archetype* _archetype, size_t _chunk_index, size_t _index);
     void invalidateEntity(const Entity& _entity);
 
     void eraseChunkEntry(Chunk* _chunk, size_t _index);

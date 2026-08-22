@@ -128,7 +128,7 @@ void Registry::addComponents(Entity _entity, Components&&... _data) {
             return; //if component already exists
 
         size_t local_index = record.archetype->getLocalIndex(type);
-        record.chunk->createAt(record.index, local_index, std::forward<T>(_data));
+        record.archetype->chunks[record.chunk_index].createAt(record.index, local_index, std::forward<T>(_data));
     };
 
     (create_new(std::forward<Components>(_data)), ...);
@@ -165,7 +165,9 @@ auto Registry::tryGetComponent(Entity _entity) -> Component* {
 
     const size_t& local_index = record.archetype->getLocalIndex(type);
     
-    auto a = static_cast<Component*>(record.chunk->component_arrays[local_index].get(record.index));
+    auto a = static_cast<Component*>(
+        record.archetype->chunks[record.chunk_index].component_arrays[local_index].get(record.index)
+    );
 
     return a;
 };
